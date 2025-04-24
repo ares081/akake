@@ -6,7 +6,6 @@ import com.ares.transport.AbstractRpcServer;
 import com.ares.transport.netty4.handler.NettyDecoder;
 import com.ares.transport.netty4.handler.NettyEncoder;
 import com.ares.transport.netty4.handler.NettyServerHandler;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -20,6 +19,7 @@ public class NettyServer extends AbstractRpcServer {
   private final ServerBootstrap bootstrap;
   private final NioEventLoopGroup boss;
   private final NioEventLoopGroup worker;
+  private ChannelFuture channelFuture;
 
   public NettyServer(ServerConfigProperties properties) throws Exception {
     super(properties);
@@ -46,15 +46,19 @@ public class NettyServer extends AbstractRpcServer {
     if (properties.getSoBacklog() > 0) {
       bootstrap.option(ChannelOption.SO_BACKLOG, properties.getSoBacklog());
     }
-    if (properties.getTcpNoDelay() !=null) {
+    if (properties.getTcpNoDelay() != null) {
       bootstrap.option(ChannelOption.TCP_NODELAY, true);
     }
-    ChannelFuture channelFuture = bootstrap.bind(host, port).sync();
-    channelFuture.channel().closeFuture();
+    this.channelFuture = bootstrap.bind(host, port).sync();
   }
 
   @Override
   public void stop() {
-
+    try {
+      this.channelFuture.channel().close();
+    } finally {
+      this.boss.shutdownGracefully();
+      this.worker.shutdownGracefully();
+    }
   }
 }

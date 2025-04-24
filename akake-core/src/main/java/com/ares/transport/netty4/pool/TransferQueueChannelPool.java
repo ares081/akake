@@ -20,7 +20,6 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.Promise;
 
 public class TransferQueueChannelPool implements ChannelPool {
-
   private final Bootstrap bootstrap;
   private final ChannelPoolHandler handler;
   private final ChannelHealthChecker healthCheck;

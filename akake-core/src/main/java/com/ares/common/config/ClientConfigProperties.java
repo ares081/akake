@@ -44,6 +44,7 @@ public class ClientConfigProperties {
   // 与连接相关的参数配置
   private Integer connectTimeout;
   private Integer readTimeout;
+  private Integer maxConnections;
   // tcp参数
   public Boolean tcpNoDelay;
   public Boolean soKeepAlive;
