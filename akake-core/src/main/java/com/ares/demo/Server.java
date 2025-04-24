@@ -1,0 +1,26 @@
+package com.ares.demo;
+
+import java.net.InetAddress;
+
+import com.ares.common.config.RegistryConfigProperties;
+import com.ares.common.config.ServerConfigProperties;
+import com.ares.transport.AbstractRpcServer;
+import com.ares.transport.netty4.NettyServer;
+
+public class Server {
+
+  public static void main(String[] args) throws Exception {
+    ServerConfigProperties properties = ServerConfigProperties.builder()
+        .group("ares")
+        .application("rpc")
+        .serviceName(HelloService.class.getName())
+        .serviceClass(HelloServiceImpl.class)
+        .version("1.0.0")
+        .build();
+    RegistryConfigProperties registerProperties = new RegistryConfigProperties();
+    properties.setRegistryConfigProperties(registerProperties);
+    AbstractRpcServer server = new NettyServer(properties);
+    String host = InetAddress.getLocalHost().getHostAddress();
+    server.init(host, properties.getPort());
+  }
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration xmlns="http://logging.apache.org/log4j/2.0/config">
+
+  <Properties>
+    <Property name="PROJECT_NAME">ace-rpc</Property>
+    <Property name="BASE_PATH">/var/logs/ace-rpc</Property>
+    <Property name="INFO_LOG">${BASE_PATH}/ace-rpc-info.log</Property>
+    <Property name="ERROR_LOG">${BASE_PATH}/ace-rpc-error.log</Property>
+    <Property name="PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Property>
+  </Properties>
+
+  <Appenders>
+    <Console name="CONSOLE" target="SYSTEM_OUT">
+      <PatternLayout pattern="${PATTERN}"/>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Root level="info">
+      <AppenderRef ref="CONSOLE"/>
+    </Root>
+  </Loggers>
+</Configuration>
