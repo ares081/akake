@@ -4,8 +4,7 @@
 
 ## TODO
 
-* [ ] client连接池
-* [ ] 异常处理
+* [x] client连接池
+* [x] 异常处理
 * [ ] load balance策略
-* [ ] 注解实现
-* [ ] springboot-starter 
+* [x] springboot-starter 
