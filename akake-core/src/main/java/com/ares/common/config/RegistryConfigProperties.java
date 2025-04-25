@@ -1,7 +1,6 @@
 package com.ares.common.config;
 
 import com.ares.common.enums.RegistryType;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

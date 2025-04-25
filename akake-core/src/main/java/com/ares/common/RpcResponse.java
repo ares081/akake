@@ -1,10 +1,8 @@
 package com.ares.common;
 
+import com.ares.common.exception.RpcException;
 import java.io.Serial;
 import java.io.Serializable;
-
-import com.ares.common.exception.RpcException;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

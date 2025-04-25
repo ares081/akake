@@ -1,23 +1,23 @@
 package com.ares.transport.netty4.handler;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ares.codec.protocol.Message;
 import com.ares.common.RpcResponse;
 import com.ares.transport.netty4.NettyFuture;
 import com.ares.transport.netty4.NettyRequestHolder;
-
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NettyClientHandler extends SimpleChannelInboundHandler<Message<RpcResponse>> {
+
   private static final Logger logger = LoggerFactory.getLogger(NettyClientHandler.class);
 
   @Override
-  protected void channelRead0(ChannelHandlerContext ctx, Message<RpcResponse> msg) throws Exception {
+  protected void channelRead0(ChannelHandlerContext ctx, Message<RpcResponse> msg)
+      throws Exception {
     try {
       long requestId = msg.getReqId();
       NettyFuture<RpcResponse> future = NettyRequestHolder.REQUEST_MAP.remove(requestId);

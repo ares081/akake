@@ -1,12 +1,10 @@
 package com.ares.registry;
 
+import com.ares.common.ServiceMeta;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.apache.curator.x.discovery.ServiceInstance;
-
-import com.ares.common.ServiceMeta;
 
 public class ZKConsistentHashLoadBalancer implements LoadBalancer<ServiceInstance<ServiceMeta>> {
 

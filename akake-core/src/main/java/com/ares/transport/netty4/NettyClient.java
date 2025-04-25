@@ -36,15 +36,13 @@ public class NettyClient extends AbstractRpcClient {
   private final Bootstrap bootstrap;
   private final NioEventLoopGroup group;
   private TransferQueueChannelPool channelPool;
-  private volatile boolean started;
 
   public NettyClient(ClientConfigProperties properties) throws Exception {
     super(properties);
-    NamedThreadFactory groupFactory = new NamedThreadFactory("client-group");
+    NamedThreadFactory groupFactory = new NamedThreadFactory("netty-client-pool");
     this.bootstrap = new Bootstrap();
     this.group = new NioEventLoopGroup(groupFactory);
 
-    // Configure bootstrap
     bootstrap.group(group)
         .channel(NioSocketChannel.class)
         .handler(new ChannelInitializer<SocketChannel>() {
@@ -71,25 +69,20 @@ public class NettyClient extends AbstractRpcClient {
 
   @Override
   public void start(String host, Integer port) throws InterruptedException {
-    if (started) {
-      return;
-    }
-
     bootstrap.remoteAddress(host, port);
 
     // Create channel pool configuration
     ChannelPoolProperties poolProperties = new ChannelPoolProperties();
     poolProperties.setMinConnections(1);
-    poolProperties.setMaxConnections(properties.getMaxConnections() != null ? properties.getMaxConnections() : 8);
+    poolProperties.setMaxConnections(
+        properties.getMaxConnections() != null ? properties.getMaxConnections() : 8);
     poolProperties.setMaxIdleTime(300); // 5 minutes
     poolProperties.setIdleCheckInterval(60); // 1 minute
     poolProperties.setAcquireTimeout(5000); // 5 seconds
 
-    // Create channel pool handler
     ChannelPoolHandler poolHandler = new ChannelPoolHandler() {
       @Override
       public void channelCreated(Channel channel) {
-        // Channel is already initialized by bootstrap handler
       }
 
       @Override
@@ -102,11 +95,7 @@ public class NettyClient extends AbstractRpcClient {
         logger.debug("Channel released to pool: {}", channel);
       }
     };
-
-    // Initialize channel pool
     this.channelPool = new TransferQueueChannelPool(bootstrap, poolHandler, poolProperties);
-    started = true;
-    setActive(true);
   }
 
   @Override
@@ -174,22 +163,16 @@ public class NettyClient extends AbstractRpcClient {
 
   @Override
   public void stop() {
-    if (!started) {
+    if (!initialized.get()) {
       return;
     }
-
     try {
-      setActive(false);
-      started = false;
-
       if (channelPool != null) {
         channelPool.close();
       }
-
       if (group != null) {
         group.shutdownGracefully(100, 1000, TimeUnit.MILLISECONDS).sync();
       }
-
       logger.info("NettyClient stopped successfully");
     } catch (Exception e) {
       logger.error("Error while stopping NettyClient", e);

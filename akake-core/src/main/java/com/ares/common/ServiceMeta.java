@@ -1,10 +1,8 @@
 package com.ares.common;
 
+import com.ares.common.constant.Constants;
 import java.io.Serial;
 import java.io.Serializable;
-
-import com.ares.common.constant.Constants;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,6 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ServiceMeta implements Serializable {
+
   @Serial
   private static final long serialVersionUID = -1025341288045851698L;
 

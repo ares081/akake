@@ -1,35 +1,73 @@
 package com.ares.transport;
 
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ares.common.ServiceMeta;
 import com.ares.common.config.ServerConfigProperties;
+import com.ares.common.exception.RpcException;
 import com.ares.common.helper.ServiceHelper;
 import com.ares.registry.Registry;
 import com.ares.registry.RegistryFactory;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractRpcServer extends AbstractRpcChannel implements RpcServer {
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+  private static final Logger logger = LoggerFactory.getLogger(AbstractRpcServer.class);
+
   protected final ServerConfigProperties properties;
   private final Registry registry;
-  protected final ConcurrentHashMap<String, Class<?>> serviceCache = new ConcurrentHashMap<>();
+  protected final ConcurrentHashMap<String, Class<?>> serviceCache;
+  private ServiceMeta serviceMeta;
 
   public AbstractRpcServer(ServerConfigProperties properties) throws Exception {
-    this.properties = properties;
+    this.properties = Objects.requireNonNull(properties, "properties cannot be null");
     this.registry = new RegistryFactory(properties.getRegistryConfigProperties()).getRegister();
+    this.serviceCache = new ConcurrentHashMap<>();
   }
 
   @Override
-  public void init(String host, Integer port) {
+  public void init(String host, Integer port) throws RpcException {
     try {
+      validateInitParameters(host, port);
+      if (!initialized.compareAndSet(false, true)) {
+        logger.warn("Server already initialized");
+        return;
+      }
       start(host, port);
-    } catch (InterruptedException e) {
-      logger.error("server start failed, host: {}, port: {}", host, port);
+      this.serviceMeta = buildServiceMeta(host, port);
+      registerService(serviceMeta);
+      cacheService(serviceMeta);
+      logger.info("Server initialized successfully on {}:{}", host, port);
+      active.set(true);
+    } catch (Exception e) {
+      initialized.set(false);
+      active.set(false);
+      logger.error("Failed to initialize server on {}:{}", host, port, e);
+      throw new RpcException("Server initialization failed", e);
     }
-    ServiceMeta serviceMeta = ServiceMeta.builder()
+  }
+
+  private void validateInitParameters(String host, Integer port) {
+    Objects.requireNonNull(host, "host cannot be null");
+    Objects.requireNonNull(port, "port cannot be null");
+    if (port <= 0 || port > 65535) {
+      throw new IllegalArgumentException("Invalid port number: " + port);
+    }
+  }
+
+  private void registerService(ServiceMeta serviceMeta) throws Exception {
+    try {
+      registry.register(serviceMeta);
+      logger.info("Service registered successfully: {}", serviceMeta.getServiceName());
+    } catch (Exception e) {
+      logger.error("Failed to register service: {}", serviceMeta.getServiceName(), e);
+      throw e;
+    }
+  }
+
+  private ServiceMeta buildServiceMeta(String host, Integer port) {
+    return ServiceMeta.builder()
         .serviceClass(properties.getServiceClass())
         .serviceName(properties.getServiceName())
         .version(properties.getVersion())
@@ -37,25 +75,37 @@ public abstract class AbstractRpcServer extends AbstractRpcChannel implements Rp
         .serviceHost(host)
         .servicePort(port)
         .build();
-    try {
-      registerService(serviceMeta);
-    } catch (Exception e) {
-      logger.error("service register faild, service: {}", serviceMeta.getServiceName());
-    }
-    String serviceKey = ServiceHelper.buildServiceKey(properties.getServiceName(), properties.getVersion(),
+  }
+
+  private void cacheService(ServiceMeta serviceMeta) {
+    String serviceKey = ServiceHelper.buildServiceKey(
+        properties.getServiceName(),
+        properties.getVersion(),
         properties.getGroup());
     serviceCache.putIfAbsent(serviceKey, serviceMeta.getServiceClass());
+    logger.debug("Service cached: {}", serviceKey);
   }
 
-  private void registerService(ServiceMeta serviceMeta) throws Exception {
-    registry.register(serviceMeta);
-  }
-
-  /**
-   * close channel
-   */
   @Override
-  public void close() {
-
+  public void close() throws RpcException {
+    if (initialized.compareAndSet(true, false)) {
+      try {
+        if (serviceMeta != null) {
+          registry.unregister(serviceMeta);
+          logger.info("Service unregistered: {}", serviceMeta.getServiceName());
+        }
+        if (registry != null) {
+          registry.close();
+        }
+        serviceCache.clear();
+        stop();
+        logger.info("Server closed successfully");
+        active.set(false);
+      } catch (Exception e) {
+        logger.error("Error while closing server", e);
+        throw new RpcException("Failed to close server", e);
+      }
+    }
   }
+
 }

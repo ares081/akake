@@ -1,7 +1,6 @@
 package com.ares.common.config;
 
 import com.ares.common.constant.Constants;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,6 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ServerConfigProperties {
+
   @Builder.Default
   private int port = Constants.DEFAULT_PORT;
   private String application;

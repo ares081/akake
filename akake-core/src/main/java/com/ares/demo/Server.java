@@ -1,11 +1,10 @@
 package com.ares.demo;
 
-import java.net.InetAddress;
-
 import com.ares.common.config.RegistryConfigProperties;
 import com.ares.common.config.ServerConfigProperties;
 import com.ares.transport.AbstractRpcServer;
 import com.ares.transport.netty4.NettyServer;
+import java.net.InetAddress;
 
 public class Server {
 

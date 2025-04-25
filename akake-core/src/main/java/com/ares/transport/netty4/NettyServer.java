@@ -13,9 +13,13 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NettyServer extends AbstractRpcServer {
 
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final ServerBootstrap bootstrap;
   private final NioEventLoopGroup boss;
   private final NioEventLoopGroup worker;
@@ -24,7 +28,7 @@ public class NettyServer extends AbstractRpcServer {
   public NettyServer(ServerConfigProperties properties) throws Exception {
     super(properties);
     this.bootstrap = new ServerBootstrap();
-    NamedThreadFactory bossFactory = new NamedThreadFactory("netty-server-boss-pool");
+    NamedThreadFactory bossFactory = new NamedThreadFactory("netty-server-worker-pool");
     NamedThreadFactory workFactory = new NamedThreadFactory("netty-server-worker-pool");
     this.boss = new NioEventLoopGroup(1, bossFactory);
     this.worker = new NioEventLoopGroup(workFactory);
@@ -55,10 +59,23 @@ public class NettyServer extends AbstractRpcServer {
   @Override
   public void stop() {
     try {
-      this.channelFuture.channel().close();
+      if (channelFuture != null) {
+        // Close the server channel
+        channelFuture.channel().close().sync();
+      }
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.warn("Interrupted while closing server channel", e);
     } finally {
-      this.boss.shutdownGracefully();
-      this.worker.shutdownGracefully();
+      // Gracefully shutdown the event loop groups
+      if (boss != null) {
+        boss.shutdownGracefully(0, 1000, TimeUnit.MILLISECONDS);
+      }
+      if (worker != null) {
+        worker.shutdownGracefully(0, 1000, TimeUnit.MILLISECONDS);
+      }
+      logger.info("Netty server resources released");
     }
   }
+
 }

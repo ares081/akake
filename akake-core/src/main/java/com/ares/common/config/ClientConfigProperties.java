@@ -3,7 +3,6 @@ package com.ares.common.config;
 import com.ares.common.constant.Constants;
 import com.ares.common.enums.CompressType;
 import com.ares.common.enums.SerializationType;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

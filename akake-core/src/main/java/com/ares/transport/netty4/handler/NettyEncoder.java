@@ -1,18 +1,17 @@
 package com.ares.transport.netty4.handler;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ares.codec.protocol.Message;
 import com.ares.codec.serialization.Serialization;
 import com.ares.codec.serialization.SerializationFactory;
 import com.ares.common.constant.Constants;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NettyEncoder<T> extends MessageToByteEncoder<Message<T>> {
+
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Override

@@ -20,9 +20,10 @@ public class ZKRegister implements Registry {
   private static final int DEFAULT_RETRY_TIMES = 3;
   private static final int DEFAULT_SLEEP_TIME_MILLS = 1000;
   private final ServiceDiscovery<ServiceMeta> serviceDiscovery;
+  private final CuratorFramework client;
 
   public ZKRegister(RegistryConfigProperties properties) throws Exception {
-    CuratorFramework client = CuratorFrameworkFactory
+    this.client = CuratorFrameworkFactory
         .newClient(properties.getRegisterAddress() + ":" + properties.getRegisterPort(),
             new ExponentialBackoffRetry(DEFAULT_SLEEP_TIME_MILLS, DEFAULT_RETRY_TIMES));
     client.start();
@@ -74,5 +75,19 @@ public class ZKRegister implements Registry {
       return instance.getPayload();
     }
     return null;
+  }
+
+  @Override
+  public void close() {
+    try {
+      if (serviceDiscovery != null) {
+        serviceDiscovery.close();
+      }
+      if (client != null) {
+        client.close();
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to close ZooKeeper resources", e);
+    }
   }
 }

@@ -2,7 +2,6 @@ package com.ares.codec.protocol;
 
 import java.io.Serial;
 import java.io.Serializable;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

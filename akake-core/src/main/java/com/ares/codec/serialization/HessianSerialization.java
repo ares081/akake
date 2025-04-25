@@ -1,12 +1,11 @@
 package com.ares.codec.serialization;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-
 import com.ares.common.enums.SerializationType;
 import com.ares.common.exception.SerializationException;
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 public class HessianSerialization implements Serialization {
 

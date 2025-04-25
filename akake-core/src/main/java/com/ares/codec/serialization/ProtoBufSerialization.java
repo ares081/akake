@@ -1,10 +1,9 @@
 package com.ares.codec.serialization;
 
-import java.lang.reflect.Method;
-
 import com.ares.common.enums.SerializationType;
 import com.ares.common.exception.SerializationException;
 import com.google.protobuf.MessageLite;
+import java.lang.reflect.Method;
 
 public class ProtoBufSerialization implements Serialization {
 

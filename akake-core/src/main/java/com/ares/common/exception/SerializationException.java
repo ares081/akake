@@ -1,6 +1,6 @@
 package com.ares.common.exception;
 
-public class SerializationException extends RpcException{
+public class SerializationException extends RpcException {
 
   public SerializationException(String message) {
     super(message);

@@ -1,8 +1,7 @@
 package com.ares.codec.serialization;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.ares.common.exception.SerializationException;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SerializationFactory {
 

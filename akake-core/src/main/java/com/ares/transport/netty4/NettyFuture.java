@@ -7,6 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class NettyFuture<T> {
+
   private Promise<T> promise;
   private long timeout;
 

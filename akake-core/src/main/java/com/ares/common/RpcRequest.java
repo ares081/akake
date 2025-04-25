@@ -14,6 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RpcRequest implements Serializable {
+
   @Serial
   private static final long serialVersionUID = -5145679540746920882L;
 
