@@ -1,0 +1,10 @@
+akake:
+  server:
+    application: app
+    interface-name: HelloService
+    target-class-ref: com.ares.demo.HelloServiceImpl
+  registry:
+    path: /test
+    register-address: 127.0.0.1
+    register-port: 2181
+    register-type: zookeeper

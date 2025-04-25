@@ -30,12 +30,10 @@ public class ClientConfigProperties {
 
   private String application;
 
-  private String serviceName;
+  private String serviceRef;
 
   @Builder.Default
   private String serviceVersion = Constants.DEFAULT_SERVICE_VERSION;
-
-  private Class<?> targetClass;
 
   // 注册中心参数
   private RegistryConfigProperties registerProperties;

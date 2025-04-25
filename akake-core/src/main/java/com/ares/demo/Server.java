@@ -12,8 +12,8 @@ public class Server {
     ServerConfigProperties properties = ServerConfigProperties.builder()
         .group("ares")
         .application("rpc")
-        .serviceName(HelloService.class.getName())
-        .serviceClass(HelloServiceImpl.class)
+        .interfaceRef(HelloService.class.getName())
+        .targetClass(HelloServiceImpl.class)
         .version("1.0.0")
         .build();
     RegistryConfigProperties registerProperties = new RegistryConfigProperties();

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="debug">
+  <Properties>
+    <Property name="PROJECT_NAME">akake</Property>
+    <Property name="BASE_PATH">/var/logs/${PROJECT_NAME}</Property>
+    <Property name="INFO_LOG">${BASE_PATH}/ace-rpc-info.log</Property>
+    <Property name="ERROR_LOG">${BASE_PATH}/ace-rpc-error.log</Property>
+    <Property name="PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+    </Property>
+  </Properties>
+  <Appenders>
+    <Console name="CONSOLE" target="SYSTEM_OUT">
+      <PatternLayout pattern="${PATTERN}"/>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Root level="DEBUG">
+      <AppenderRef ref="CONSOLE"/>
+    </Root>
+    <!-- 指定包名的日志 -->
+    <Logger name="com.ares" level="DEBUG" additivity="false">
+      <AppenderRef ref="CONSOLE"/>
+    </Logger>
+  </Loggers>
+</Configuration>

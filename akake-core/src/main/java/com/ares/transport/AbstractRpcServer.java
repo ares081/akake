@@ -68,8 +68,8 @@ public abstract class AbstractRpcServer extends AbstractRpcChannel implements Rp
 
   private ServiceMeta buildServiceMeta(String host, Integer port) {
     return ServiceMeta.builder()
-        .serviceClass(properties.getServiceClass())
-        .serviceName(properties.getServiceName())
+        .serviceClass(properties.getTargetClass())
+        .serviceName(properties.getInterfaceRef())
         .version(properties.getVersion())
         .group(properties.getGroup())
         .serviceHost(host)
@@ -79,7 +79,7 @@ public abstract class AbstractRpcServer extends AbstractRpcChannel implements Rp
 
   private void cacheService(ServiceMeta serviceMeta) {
     String serviceKey = ServiceHelper.buildServiceKey(
-        properties.getServiceName(),
+        properties.getInterfaceRef(),
         properties.getVersion(),
         properties.getGroup());
     serviceCache.putIfAbsent(serviceKey, serviceMeta.getServiceClass());

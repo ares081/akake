@@ -59,12 +59,12 @@ public abstract class AbstractRpcInvocationHandler implements InvocationHandler 
   private ServiceMeta lookupService(AbstractRpcClient client) throws RpcException {
     ServiceMeta serviceMeta = client.serviceLookup(
         properties.getGroup(),
-        properties.getServiceName(),
+        properties.getServiceRef(),
         properties.getServiceVersion());
 
     if (serviceMeta == null) {
       String errorMsg = String.format("Service not found: %s (group=%s, version=%s)",
-          properties.getServiceName(),
+          properties.getServiceRef(),
           properties.getGroup(),
           properties.getServiceVersion());
       logger.error(errorMsg);

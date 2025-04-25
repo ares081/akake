@@ -10,8 +10,7 @@ public class Client {
     ClientConfigProperties properties = ClientConfigProperties.builder()
         .group("ares")
         .application("demo")
-        .targetClass(HelloServiceImpl.class)
-        .serviceName(HelloService.class.getName())
+        .serviceRef(HelloService.class.getName())
         .serviceVersion("1.0.0")
         .connectTimeout(1000)
         .readTimeout(3000)
@@ -19,7 +18,7 @@ public class Client {
     RegistryConfigProperties registerProperties = new RegistryConfigProperties();
     properties.setRegisterProperties(registerProperties);
     HelloService service = NettyInvocationHandler.newInstance(HelloService.class, properties);
-    String result = service.sayHello("client");
+    String result = service.sayHello("server");
     System.out.println(result);
   }
 }
