@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 
 import com.ares.annotaion.EnableClient;
 import com.ares.common.config.ClientConfigProperties;
+import com.ares.common.config.PoolConfigProperties;
 import com.ares.common.config.RegistryConfigProperties;
 import com.ares.common.exception.RpcException;
 import com.ares.transport.netty4.NettyInvocationHandler;
@@ -32,12 +33,16 @@ public class AkakeClientAutoConfiguration {
           .registerPort(registryProperties.getRegisterPort())
           .registerType(registryProperties.getRegisterType())
           .build();
+
+      // todo add to config
+      PoolConfigProperties poolConfigProperties = PoolConfigProperties.builder().build();
       ClientConfigProperties properties = ClientConfigProperties.builder()
           .group(akakeClientConfigProperties.getGroup())
           .application(akakeClientConfigProperties.getApplication())
           .serviceRef(akakeClientConfigProperties.getServiceRef())
           .serviceVersion(akakeClientConfigProperties.getServiceVersion())
           .registerProperties(registryConfigProperties)
+          .poolProperties(poolConfigProperties)
           .connectTimeout(akakeClientConfigProperties.getConnectTimeout())
           .readTimeout(akakeClientConfigProperties.getReadTimeout())
           .maxConnections(akakeClientConfigProperties.getMaxConnections())
@@ -45,6 +50,7 @@ public class AkakeClientAutoConfiguration {
           .soKeepAlive(akakeClientConfigProperties.getSoKeepAlive())
           .soReuseAddr(akakeClientConfigProperties.getSoReuseAddr())
           .build();
+
       return new NettyInvocationHandler(properties);
     } catch (Exception e) {
       throw new RpcException("netty client start failed", e);

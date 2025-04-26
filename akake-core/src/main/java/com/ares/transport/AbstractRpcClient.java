@@ -51,7 +51,7 @@ public abstract class AbstractRpcClient extends AbstractRpcChannel implements Rp
       start(host, port);
       active.set(true);
       logger.info("Client initialized successfully - {}:{}", host, port);
-    } catch (InterruptedException e) {
+    } catch (Exception e) {
       Thread.currentThread().interrupt();
       initialized.set(false);
       active.set(false);
@@ -102,10 +102,8 @@ public abstract class AbstractRpcClient extends AbstractRpcChannel implements Rp
         .params(serviceMeta.getParams())
         .paramTypes(serviceMeta.getParamTypes())
         .build();
-
     // Serialize request
     byte[] body = codec.serialize(request);
-
     // Build message
     return Message.<byte[]>builder()
         .magic(Constants.MAGIC)

@@ -12,6 +12,8 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ares.common.config.PoolConfigProperties;
+
 public class TransferQueueConnectionPool<T> implements AutoCloseable {
   private final Logger logger = LoggerFactory.getLogger(TransferQueueConnectionPool.class);
 
@@ -38,13 +40,12 @@ public class TransferQueueConnectionPool<T> implements AutoCloseable {
   }
 
   private void initializePool() {
-    for (int i = 0; i < properties.minSize(); i++) {
+    for (int i = 0; i < properties.getMinSize(); i++) {
       createAndAddConnection();
     }
   }
 
   private void createAndAddConnection() {
-    logger.info("create connection");
     T conn = connFactory.get();
     ConnectionWrapper<T> wrapper = new ConnectionWrapper<>(conn);
     pool.offer(wrapper);
@@ -62,9 +63,9 @@ public class TransferQueueConnectionPool<T> implements AutoCloseable {
       return wrapper.getConnection();
     }
 
-    if (totalConns.get() < properties.maxSize()) {
+    if (totalConns.get() < properties.getMaxSize()) {
       synchronized (this) {
-        if (totalConns.get() < properties.maxSize()) {
+        if (totalConns.get() < properties.getMaxSize()) {
           createAndAddConnection();
           wrapper = pool.poll();
           if (wrapper != null) {
@@ -83,7 +84,6 @@ public class TransferQueueConnectionPool<T> implements AutoCloseable {
   }
 
   public void release(T connection) {
-    logger.info("release connection id: {}", connection);
     if (connection == null) {
       return;
     }
@@ -122,8 +122,8 @@ public class TransferQueueConnectionPool<T> implements AutoCloseable {
   private void startScheduleTasks() {
     scheduledExecutor.scheduleAtFixedRate(
         this::checkIdsTask,
-        properties.validationInterval(),
-        properties.validationInterval(),
+        properties.getValidationInterval(),
+        properties.getValidationInterval(),
         TimeUnit.MILLISECONDS);
     // 定期记录池状态
     scheduledExecutor.scheduleAtFixedRate(this::logPoolStats, 1, 1, TimeUnit.SECONDS);
@@ -136,11 +136,11 @@ public class TransferQueueConnectionPool<T> implements AutoCloseable {
         boolean remove = false;
 
         // 检查连接是否过期
-        if (now - wrapper.getCreatedTime() > properties.maxLifetime()) {
+        if (now - wrapper.getCreatedTime() > properties.getMaxLifetime()) {
           remove = true;
         }
         // 检查空闲连接
-        else if (now - wrapper.getLastAccessTime() > properties.maxIdleTime()) {
+        else if (now - wrapper.getLastAccessTime() > properties.getMaxIdleTime()) {
           remove = true;
         }
         // 验证连接是否有效
@@ -155,7 +155,7 @@ public class TransferQueueConnectionPool<T> implements AutoCloseable {
         return remove;
       });
       // 确保维持最小连接数
-      while (totalConns.get() < properties.minSize()) {
+      while (totalConns.get() < properties.getMinSize()) {
         createAndAddConnection();
       }
     } catch (Exception e) {

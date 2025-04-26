@@ -26,7 +26,6 @@ public abstract class AbstractRpcInvocationHandler implements InvocationHandler 
 
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-    // Handle Object methods
     if (method.getDeclaringClass() == Object.class) {
       return method.invoke(this, args);
     }
@@ -35,24 +34,13 @@ public abstract class AbstractRpcInvocationHandler implements InvocationHandler 
       client = createClient(properties);
       ServiceMeta serviceMeta = lookupService(client);
       configureMethodInvocation(serviceMeta, method, args);
-      client.init(serviceMeta.getServiceHost(), serviceMeta.getServicePort());
+      if (!client.isActive()) {
+        client.init(serviceMeta.getServiceHost(), serviceMeta.getServicePort());
+      }
       return client.send(serviceMeta);
-
     } catch (RpcException e) {
       logger.error("RPC invocation failed for method: {}", method.getName(), e);
       throw e;
-    } catch (Exception e) {
-      logger.error("Unexpected error during RPC invocation for method: {}", method.getName(), e);
-      throw new RpcException("RPC invocation failed", e);
-    } finally {
-      // Cleanup resources
-      if (client != null) {
-        try {
-          client.close();
-        } catch (Exception e) {
-          logger.warn("Failed to close RPC client", e);
-        }
-      }
     }
   }
 

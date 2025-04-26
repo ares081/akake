@@ -1,7 +1,7 @@
 package com.ares.common.pool;
 
 public interface ConnectionValidator<T> {
-  boolean validate(T channel);
+  boolean validate(T connection);
 
-  void closeConnection(T channel);
+  void closeConnection(T connection);
 }

@@ -14,6 +14,7 @@ import com.ares.transport.AbstractRpcClient;
 public class NettyInvocationHandler extends AbstractRpcInvocationHandler {
 
   private static final Logger logger = LoggerFactory.getLogger(NettyInvocationHandler.class);
+  private static volatile NettyClient nettyClient;
 
   public NettyInvocationHandler(ClientConfigProperties properties) {
     super(Objects.requireNonNull(properties, "properties cannot be null"));
@@ -21,22 +22,24 @@ public class NettyInvocationHandler extends AbstractRpcInvocationHandler {
 
   @Override
   protected AbstractRpcClient createClient(ClientConfigProperties properties) throws RpcException {
-    try {
-      AbstractRpcClient client = new NettyClient(properties);
-      logger.debug("Created new Netty RPC client");
-      return client;
-    } catch (Exception e) {
-      logger.error("Failed to create Netty RPC client", e);
-      throw new RpcException("Failed to create Netty RPC client", e);
+    if (nettyClient == null) {
+      synchronized (this) {
+        if (nettyClient == null) {
+          try {
+            nettyClient = new NettyClient(properties);
+          } catch (Exception e) {
+            throw new RuntimeException("Failed to create NettyClient", e);
+          }
+        }
+      }
     }
+    return nettyClient;
   }
 
   @SuppressWarnings("unchecked")
   public static <T> T newInstance(Class<T> clazz, ClientConfigProperties properties)
       throws RpcException {
     try {
-      Objects.requireNonNull(clazz, "interface class cannot be null");
-      Objects.requireNonNull(properties, "properties cannot be null");
       if (!clazz.isInterface()) {
         throw new IllegalArgumentException(clazz.getName() + " is not an interface");
       }
@@ -47,7 +50,6 @@ public class NettyInvocationHandler extends AbstractRpcInvocationHandler {
           new NettyInvocationHandler(properties));
       logger.debug("Created new proxy instance for interface: {}", clazz.getName());
       return proxy;
-
     } catch (Exception e) {
       logger.error("Failed to create proxy instance for interface: {}", clazz.getName(), e);
       throw new RpcException("Failed to create proxy instance", e);

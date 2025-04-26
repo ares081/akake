@@ -38,6 +38,9 @@ public class ClientConfigProperties {
   // 注册中心参数
   private RegistryConfigProperties registerProperties;
 
+  // 连接池相关配置
+  PoolConfigProperties poolProperties;
+
   // 与连接相关的参数配置
   private Integer connectTimeout;
   private Integer readTimeout;

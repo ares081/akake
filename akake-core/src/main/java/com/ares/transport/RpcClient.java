@@ -5,7 +5,7 @@ import com.ares.common.exception.RpcException;
 
 public interface RpcClient {
 
-  void start(String host, Integer port) throws InterruptedException;
+  void start(String host, Integer port) throws RpcException;
 
   void stop();
 
