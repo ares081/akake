@@ -178,5 +178,4 @@ public class NettyClient extends AbstractRpcClient {
       logger.error("Error while stopping NettyClient", e);
     }
   }
-
 }

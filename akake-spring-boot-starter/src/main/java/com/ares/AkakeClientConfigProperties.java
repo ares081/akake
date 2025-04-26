@@ -1,11 +1,12 @@
 package com.ares;
 
-import com.ares.common.constant.Constants;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+
+import com.ares.common.constant.Constants;
+
+import lombok.Getter;
+import lombok.Setter;
 
 @Setter
 @Getter
