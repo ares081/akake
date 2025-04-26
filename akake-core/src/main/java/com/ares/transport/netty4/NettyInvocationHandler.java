@@ -1,15 +1,13 @@
 package com.ares.transport.netty4;
 
-import java.lang.reflect.Proxy;
-import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ares.common.config.ClientConfigProperties;
 import com.ares.common.exception.RpcException;
 import com.ares.proxy.AbstractRpcInvocationHandler;
 import com.ares.transport.AbstractRpcClient;
+import java.lang.reflect.Proxy;
+import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NettyInvocationHandler extends AbstractRpcInvocationHandler {
 
@@ -44,9 +42,7 @@ public class NettyInvocationHandler extends AbstractRpcInvocationHandler {
         throw new IllegalArgumentException(clazz.getName() + " is not an interface");
       }
       ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-      T proxy = (T) Proxy.newProxyInstance(
-          classLoader,
-          new Class<?>[] { clazz },
+      T proxy = (T) Proxy.newProxyInstance(classLoader, new Class<?>[]{clazz},
           new NettyInvocationHandler(properties));
       logger.debug("Created new proxy instance for interface: {}", clazz.getName());
       return proxy;

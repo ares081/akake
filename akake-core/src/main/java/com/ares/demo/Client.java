@@ -1,14 +1,14 @@
 package com.ares.demo;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ares.common.config.ClientConfigProperties;
 import com.ares.common.config.PoolConfigProperties;
 import com.ares.common.config.RegistryConfigProperties;
 import com.ares.transport.netty4.NettyInvocationHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Client {
+
   private static final Logger logger = LoggerFactory.getLogger(Client.class);
 
   public static void main(String[] args) throws Exception {
@@ -25,10 +25,10 @@ public class Client {
     properties.setRegisterProperties(registerProperties);
     properties.setPoolProperties(poolProperties);
     HelloService service = NettyInvocationHandler.newInstance(HelloService.class, properties);
-
     for (int i = 0; i < 5; i++) {
       String result = service.sayHello("server");
       logger.info("get msg from server: {}", result);
     }
+
   }
 }

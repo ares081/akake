@@ -1,11 +1,5 @@
 package com.ares.transport.netty4;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ares.codec.protocol.Message;
 import com.ares.common.RpcResponse;
 import com.ares.common.config.ClientConfigProperties;
@@ -16,9 +10,9 @@ import com.ares.transport.AbstractRpcClient;
 import com.ares.transport.netty4.handler.NettyClientHandler;
 import com.ares.transport.netty4.handler.NettyDecoder;
 import com.ares.transport.netty4.handler.NettyEncoder;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.DefaultEventLoop;
@@ -26,13 +20,19 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultPromise;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NettyClient extends AbstractRpcClient {
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final Bootstrap bootstrap;
   private final NioEventLoopGroup group;
+  private ChannelFuture channelFuture;
   private TransferQueueConnectionPool<Channel> channelPool;
+
 
   public NettyClient(ClientConfigProperties properties) throws Exception {
     super(properties);
@@ -64,7 +64,12 @@ public class NettyClient extends AbstractRpcClient {
   @Override
   public void start(String host, Integer port) throws RpcException {
     bootstrap.remoteAddress(host, port);
-    channelPool = new NettyConnectionPool(bootstrap.clone(), properties.getPoolProperties()).getPool();
+    try {
+      channelFuture = bootstrap.connect().sync();
+    } catch (InterruptedException e) {
+      throw new RpcException(e);
+    }
+    channelPool = new NettyConnectionPool(channelFuture, properties.getPoolProperties()).getPool();
   }
 
   @Override
@@ -72,8 +77,7 @@ public class NettyClient extends AbstractRpcClient {
     checkActive();
     Channel channel = null;
     final NettyFuture<RpcResponse> future = new NettyFuture<>(
-        new DefaultPromise<>(new DefaultEventLoop()),
-        properties.getReadTimeout());
+        new DefaultPromise<>(new DefaultEventLoop()), properties.getReadTimeout());
     try {
       NettyRequestHolder.REQUEST_MAP.put(message.getReqId(), future);
       channel = acquireChannel();
@@ -133,6 +137,14 @@ public class NettyClient extends AbstractRpcClient {
     try {
       if (channelPool != null) {
         channelPool.close();
+      }
+      if (channelFuture != null) {
+        ChannelFuture closeFuture = channelFuture.channel().closeFuture().sync();
+        closeFuture.addListener(future -> {
+          if (future.isSuccess()) {
+            closeFuture.channel().close();
+          }
+        });
       }
       if (group != null) {
         group.shutdownGracefully(100, 1000, TimeUnit.MILLISECONDS).sync();
